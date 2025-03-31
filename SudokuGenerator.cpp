@@ -9,7 +9,7 @@ using namespace std::chrono;
 
 int main()
 {
-    SudokuGenerator builder(9);
+    SudokuGenerator builder(BoardSz::NINE);
     string strBoard = "";
     thread t(&SudokuGenerator::solve, &builder);
     t.detach();

@@ -6,8 +6,11 @@ using namespace std;
 static atomic<bool> run = false;
 static constexpr int MAX_CONFLICTS{ 500 };
 
-SudokuGenerator::SudokuGenerator(int size) : gen{ rd() },
-size{ size },
+SudokuGenerator::SudokuGenerator(BoardSz sz) : 
+gen{ rd() },
+boardSz { sz },
+size{ static_cast<int>(sz)},
+boxSx{ static_cast<int>(sqrt(size)) },
 completed{ false }
 {
     initBoard();
@@ -320,7 +323,7 @@ void cell::reset()
     col = -1;
 }
 
-bool cell::hasData()
+bool cell::hasData() const
 {
     return row != -1 && col != -1;
 }

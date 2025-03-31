@@ -6,7 +6,11 @@
 #include <string_view>
 #include <random>
 
-using board_type = std::vector<std::vector<uint8_t>>;
+enum class BoardSz
+{
+    NINE = 9,
+    SIXTEEN = 16
+};
 
 struct cell
 {
@@ -14,14 +18,15 @@ struct cell
     uint8_t col = -1;
 
     void reset();
-    bool hasData();
+    bool hasData() const;
 };
 
 class SudokuGenerator
 {
 private:
-    board_type board;
-    int size; // 9x9 por ejemplo -> size = 9
+    std::vector<std::vector<uint8_t>> board;
+    const int size;     // 9x9 por ejemplo -> size = 9
+    const int boxSx;    // 9x9 por ejemplo -> boxSz = sqrt(size) = 3 
     std::random_device rd;
     std::mt19937 gen;
     cell conflictCell;
@@ -44,7 +49,7 @@ public:
     SudokuGenerator operator=(SudokuGenerator&&) = delete;
     ~SudokuGenerator() = default;
 
-    SudokuGenerator(int size);
+    SudokuGenerator(BoardSz sz);
     void printBoard(std::string& out);
     void generateSeed();
     void solve();
@@ -52,5 +57,6 @@ public:
     float getPercentage();
     bool checkSolution();
     void deleteCellsToSolveBoard(int amountOfCellsToDelete);
+    const BoardSz boardSz;
 };
 
