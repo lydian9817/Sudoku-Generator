@@ -6,6 +6,10 @@
 #include <string_view>
 #include <random>
 
+const std::vector<char> NINE_SZ_VALUES{ '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+const std::vector<char> SIXTEEN_SZ_VALUES{ '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G' };
+constexpr char EMPTY{ ' ' };
+
 enum class BoardSz
 {
     NINE = 9,
@@ -18,20 +22,19 @@ struct cell
     uint8_t col = -1;
 
     void reset();
-    bool hasData() const;
 };
 
 class SudokuGenerator
 {
 private:
-    std::vector<std::vector<uint8_t>> board;
+    std::vector<char> values;
+    std::vector<std::vector<char>> board;
     const int size;     // 9x9 por ejemplo -> size = 9
-    const int boxSx;    // 9x9 por ejemplo -> boxSz = sqrt(size) = 3 
+    const int boxSz;    // 9x9 por ejemplo -> boxSz = sqrt(size) = 3 
     std::random_device rd;
     std::mt19937 gen;
     cell conflictCell;
     std::atomic<bool> completed;
-    void initBoard();
     bool checkNumberInRow(uint8_t n, uint8_t row, uint8_t col);
     bool checkNumberInCol(uint8_t n, uint8_t row, uint8_t col);
     bool checkNumberInSubBoard(uint8_t n, uint8_t row, uint8_t col);
@@ -41,6 +44,9 @@ private:
     bool checkCompletion();
     void deleteFromCell(uint8_t row, uint8_t col);
     bool conflictBeforeCell(cell& target, cell& conflict);
+    void setValues();
+    char getRandomValueAndDelete();
+    const int getStartingRowOrColIndex(const int rowOrCol) const;
 
 public:
     SudokuGenerator(const SudokuGenerator&) = delete;
@@ -52,7 +58,7 @@ public:
     SudokuGenerator(BoardSz sz);
     void printBoard(std::string& out);
     void generateSeed();
-    void solve();
+    void generate();
     bool isComplete();
     float getPercentage();
     bool checkSolution();

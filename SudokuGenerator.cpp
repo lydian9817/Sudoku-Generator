@@ -9,14 +9,14 @@ using namespace std::chrono;
 
 int main()
 {
-    SudokuGenerator builder(BoardSz::NINE);
+    SudokuGenerator generator(BoardSz::NINE);
     string strBoard = "";
-    thread t(&SudokuGenerator::solve, &builder);
+    thread t(&SudokuGenerator::generate, &generator);
     t.detach();
     steady_clock::time_point start = high_resolution_clock::now();
     steady_clock::time_point now;
     milliseconds millis;
-    while (!builder.isComplete())
+    while (!generator.isComplete())
     {
         now = high_resolution_clock::now();
         millis = duration_cast<milliseconds>(now - start);
@@ -25,18 +25,18 @@ int main()
         Sleep(0);
     }
 
-    builder.printBoard(strBoard);
+    generator.printBoard(strBoard);
     cout << "\n" << strBoard.c_str() << endl;
 
-    if (builder.checkSolution())
+    if (generator.checkSolution())
         cout << "Solucion correcta" << endl;
     else
         cout << "Solucion incorrecta" << endl;
 
-    builder.deleteCellsToSolveBoard(55);
+    generator.deleteCellsToSolveBoard(55);
     cout << "Tablero a resolver: " << endl;
 
-    builder.printBoard(strBoard);
+    generator.printBoard(strBoard);
     cout << "\n" << strBoard.c_str() << endl;
 
     return 0;
