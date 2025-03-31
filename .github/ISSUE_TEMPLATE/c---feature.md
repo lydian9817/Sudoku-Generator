@@ -2,7 +2,7 @@
 name: C++ Feature
 about: Plantilla para features de C++
 title: "[C++]"
-labels: Feature
+labels: C++, Feature
 assignees: lydian9817
 
 ---
