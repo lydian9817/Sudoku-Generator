@@ -145,10 +145,15 @@ bool SudokuGenerator::conflictBeforeCell(cell& target, cell& conflict)
 
 void SudokuGenerator::setValues()
 {
-    if (boardSz == BoardSz::NINE)
-        values = NINE_SZ_VALUES;
-    else
-        values = SIXTEEN_SZ_VALUES;
+    switch (boardSz)
+    {
+    case BoardSz::FOUR: values = FOUR_SZ_VALUES;
+        break;
+    case BoardSz::NINE: values = NINE_SZ_VALUES;
+        break;
+    case BoardSz::SIXTEEN: values = SIXTEEN_SZ_VALUES;
+        break;
+    }
 }
 
 char SudokuGenerator::getRandomValueAndDelete()

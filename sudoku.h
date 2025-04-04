@@ -6,12 +6,14 @@
 #include <string_view>
 #include <random>
 
+const std::vector<char> FOUR_SZ_VALUES{ '1', '2', '3', '4' };
 const std::vector<char> NINE_SZ_VALUES{ '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 const std::vector<char> SIXTEEN_SZ_VALUES{ '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G' };
 constexpr char EMPTY{ ' ' };
 
 enum class BoardSz
 {
+    FOUR = 4,
     NINE = 9,
     SIXTEEN = 16
 };
