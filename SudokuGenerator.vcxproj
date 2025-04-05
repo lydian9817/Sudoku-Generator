@@ -143,10 +143,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="SudokuSolver.cpp" />
     <ClCompile Include="sudoku.cpp" />
     <ClCompile Include="SudokuGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="SudokuSolver.h" />
     <ClInclude Include="sudoku.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

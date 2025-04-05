@@ -10,25 +10,11 @@ SudokuGenerator::SudokuGenerator(BoardSz sz) :
 gen{ rd() },
 boardSz { sz },
 size{ static_cast<int>(sz)},
-boxSx{ static_cast<int>(sqrt(size)) },
+boxSz{ static_cast<int>(sqrt(size)) },
 completed{ false }
 {
-    initBoard();
-}
-
-void SudokuGenerator::initBoard()
-{
-    for (int i = 0; i < size; i++)
-    {
-        vector<uint8_t> v;
-        board.push_back(v);
-        for (int j = 0; j < size; j++)
-            board[i].push_back(0);
-
-        board[i].shrink_to_fit();
-    }
-
-    board.shrink_to_fit();
+    setValues();
+    board.assign(size, vector<char>(size, EMPTY));
 }
 
 bool SudokuGenerator::checkNumberInRow(uint8_t n, uint8_t row, uint8_t col)
@@ -63,26 +49,12 @@ bool SudokuGenerator::checkNumberInCol(uint8_t n, uint8_t row, uint8_t col)
 
 bool SudokuGenerator::checkNumberInSubBoard(uint8_t n, uint8_t row, uint8_t col)
 {
-    uint8_t rowStart = 0;
-    uint8_t colStart = 0;
+    int rowStart = getStartingRowOrColIndex(row);
+    int colStart = getStartingRowOrColIndex(col);
 
-    if (row < 3)
-        rowStart = 0;
-    else if (row < 6)
-        rowStart = 3;
-    else
-        rowStart = 6;
-
-    if (col < 3)
-        colStart = 0;
-    else if (col < 6)
-        colStart = 3;
-    else
-        colStart = 6;
-
-    for (int i = rowStart; i < rowStart + 3; i++)
+    for (int i = rowStart; i < rowStart + boxSz; i++)
     {
-        for (int j = colStart; j < colStart + 3; j++)
+        for (int j = colStart; j < colStart + boxSz; j++)
         {
             if (i != row && j != col && board[i][j] == n)
             {
@@ -113,7 +85,7 @@ int SudokuGenerator::getRandomNumber(int min, int max)
     return distrib(gen);
 }
 
-void SudokuGenerator::getFirstEmptyCell(cell* pC)
+void SudokuGenerator::getFirstEmptyCell(cell*pC)
 {
     bool found = false;
     for (int i = 0; i < size; i++)
@@ -122,7 +94,7 @@ void SudokuGenerator::getFirstEmptyCell(cell* pC)
             break;
         for (int j = 0; j < size; j++)
         {
-            if (board[i][j] == 0)
+            if (board[i][j] == EMPTY)
             {
                 pC->row = i;
                 pC->col = j;
@@ -137,9 +109,9 @@ bool SudokuGenerator::checkCompletion()
 {
     for (auto& row : board)
     {
-        for (auto& n : row)
+        for (char& c : row)
         {
-            if (n == 0)
+            if (c == EMPTY)
             {
                 completed = false;
                 return false;
@@ -156,7 +128,7 @@ void SudokuGenerator::deleteFromCell(uint8_t row, uint8_t col)
     {
         for (int j = col; j < size; j++)
         {
-            board[i][j] = 0;
+            board[i][j] = EMPTY;
         }
     }
 }
@@ -171,6 +143,37 @@ bool SudokuGenerator::conflictBeforeCell(cell& target, cell& conflict)
     return ret;
 }
 
+void SudokuGenerator::setValues()
+{
+    switch (boardSz)
+    {
+    case BoardSz::FOUR: values = FOUR_SZ_VALUES;
+        break;
+    case BoardSz::NINE: values = NINE_SZ_VALUES;
+        break;
+    case BoardSz::SIXTEEN: values = SIXTEEN_SZ_VALUES;
+        break;
+    }
+}
+
+char SudokuGenerator::getRandomValueAndDelete()
+{
+    char ret;
+    int rnd = getRandomNumber(0, static_cast<int>(values.size()) - 1);
+    ret = values[rnd];
+    values.erase(values.begin() + rnd);
+    return ret;
+}
+
+const int SudokuGenerator::getStartingRowOrColIndex(const int rowOrCol) const
+{
+    int i = rowOrCol;
+    while (i % boxSz != 0)
+        i--;
+
+    return i;
+}
+
 float SudokuGenerator::getPercentage()
 {
     run = false;
@@ -178,9 +181,9 @@ float SudokuGenerator::getPercentage()
     float counter = 0;
     for (auto& row : board)
     {
-        for (auto& n : row)
+        for (char& n : row)
         {
-            if (n > 0)
+            if (n != EMPTY)
                 counter++;
         }
     }
@@ -212,11 +215,11 @@ void SudokuGenerator::deleteCellsToSolveBoard(int amountOfCellsToDelete)
 
     while (counter < amountOfCellsToDelete)
     {
-        row = getRandomNumber(0, 8);
-        col = getRandomNumber(0, 8);
-        if (board[row][col] > 0)
+        row = getRandomNumber(0, size - 1);
+        col = getRandomNumber(0, size - 1);
+        if (board[row][col] != EMPTY)
         {
-            board[row][col] = 0;
+            board[row][col] = EMPTY;
             counter++;
         }
     }
@@ -229,27 +232,21 @@ bool SudokuGenerator::isComplete()
 
 void SudokuGenerator::generateSeed()
 {
-    int index = 0;
+    int boxCount = 0;
 
-    while (index < size)
+    while (boxCount < boxSz)
     {
-        vector<uint8_t> v{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        int max = 8;
-        for (int i = index; i < index + 3; i++)
+        setValues();
+        for (int i = boxCount; i < boxCount + boxSz; i++)
         {
-            for (int j = index; j < index + 3; j++)
-            {
-                int rnd = getRandomNumber(0, max);
-                board[i][j] = v[rnd];
-                v.erase(v.begin() + rnd);
-                max--;
-            }
+            for (int j = boxCount; j < boxCount + boxSz; j++)
+                board[i][j] = getRandomValueAndDelete();
         }
-        index += 3;
+        boxCount += boxSz + 1;
     }
 }
 
-void SudokuGenerator::solve()
+void SudokuGenerator::generate()
 {
     int conflicts = 0;
     run = true;
@@ -260,26 +257,21 @@ void SudokuGenerator::solve()
         if (!run)
             continue;
 
-        vector<uint8_t> v{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        int max = 8;
-        uint8_t n = 0;
+        setValues();
+        char c = '\0';
         bool set = false;
         conflictCell.reset();
-        cell c;
-        getFirstEmptyCell(&c);
-        if (c.hasData())
+        cell cell;
+        getFirstEmptyCell(&cell);
+        if (cell.row != -1 && cell.col != -1)
         {
-            while (!v.empty())
+            while (!values.empty())
             {
-                int rnd = getRandomNumber(0, max);
-                n = v[rnd];
-                v.erase(v.begin() + rnd);
-                max--;
-
-                set = check(n, c.row, c.col);
+                c = getRandomValueAndDelete();
+                set = check(c, cell.row, cell.col);
                 if (set)
                 {
-                    board[c.row][c.col] = n;
+                    board[cell.row][cell.col] = c;
                     break;
                 }
             }
@@ -292,12 +284,12 @@ void SudokuGenerator::solve()
                     deleteFromCell(0, 0);
                     generateSeed();
                 }
-                if (conflictBeforeCell(c, conflictCell))
+                if (conflictBeforeCell(cell, conflictCell))
                     deleteFromCell(conflictCell.row, conflictCell.col);
                 else
                 {
-                    board[c.row][c.col] = n;
-                    board[conflictCell.row][conflictCell.col] = 0;
+                    board[cell.row][cell.col] = c;
+                    board[conflictCell.row][conflictCell.col] = EMPTY;
                 }
             }
         }
@@ -308,11 +300,15 @@ void SudokuGenerator::solve()
 void SudokuGenerator::printBoard(string& out)
 {
     out.clear();
-    for (int i = 0; i < size; i++)
-    {
-        for (int j = 0; j < size; j++)
-            out += "[" + to_string(board[i][j]) + "]";
 
+    for (auto& row : board)
+    {
+        for (char& n : row)
+        {
+            out += "[";
+            out += n;
+            out += "]";
+        }
         out += "\n";
     }
 }
@@ -321,9 +317,4 @@ void cell::reset()
 {
     row = -1;
     col = -1;
-}
-
-bool cell::hasData() const
-{
-    return row != -1 && col != -1;
 }
