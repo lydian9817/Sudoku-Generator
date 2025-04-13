@@ -6,15 +6,17 @@ using namespace std;
 static atomic<bool> run = false;
 static constexpr int MAX_CONFLICTS{ 500 };
 
-SudokuGenerator::SudokuGenerator(BoardSz sz) : 
+SudokuGenerator::SudokuGenerator(BoardSz sz, Difficulty difficulty, const size_t count) :
 gen{ rd() },
 boardSz { sz },
+difficulty{ difficulty },
+count{ count },
 size{ static_cast<int>(sz)},
 boxSz{ static_cast<int>(sqrt(size)) },
 completed{ false }
 {
     setValues();
-    board.assign(size, vector<char>(size, EMPTY));
+    generateBoards();
 }
 
 bool SudokuGenerator::checkNumberInRow(uint8_t n, uint8_t row, uint8_t col)
@@ -174,6 +176,15 @@ const int SudokuGenerator::getStartingRowOrColIndex(const int rowOrCol) const
     return i;
 }
 
+void SudokuGenerator::boardToString(std::string& out)
+{
+    for (auto& row : board)
+    {
+        for (char& c : row)
+            out += c;
+    }
+}
+
 float SudokuGenerator::getPercentage()
 {
     run = false;
@@ -207,8 +218,20 @@ bool SudokuGenerator::checkSolution()
     return true;
 }
 
-void SudokuGenerator::deleteCellsToSolveBoard(int amountOfCellsToDelete)
+void SudokuGenerator::deleteCellsToSolveBoard()
 {
+    int amountOfCellsToDelete = 0;
+    
+    switch (difficulty)
+    {
+    case Difficulty::EASY: amountOfCellsToDelete = 40;
+        break;
+    case Difficulty::NORMAL: amountOfCellsToDelete = 55;
+        break;
+    case Difficulty::HARD: amountOfCellsToDelete = 65;
+        break;
+    }
+
     int counter = 0;
     int row = 0;
     int col = 0;
@@ -223,6 +246,11 @@ void SudokuGenerator::deleteCellsToSolveBoard(int amountOfCellsToDelete)
             counter++;
         }
     }
+}
+
+std::unordered_map<int, StrBoard>* SudokuGenerator::getBoards()
+{
+    return &generatedBoards;
 }
 
 bool SudokuGenerator::isComplete()
@@ -250,6 +278,10 @@ void SudokuGenerator::generate()
 {
     int conflicts = 0;
     run = true;
+    completed = false;
+    board.clear();
+    board.assign(size, vector<char>(size, EMPTY));
+
     generateSeed();
 
     while (!completed)
@@ -297,6 +329,26 @@ void SudokuGenerator::generate()
     }
 }
 
+void SudokuGenerator::generateBoards()
+{
+    int i = 0;
+    while (i < count)
+    {
+        generate();
+        if (checkSolution())
+        {
+            StrBoard strB(size);
+
+            boardToString(strB.solved);
+            deleteCellsToSolveBoard();
+            boardToString(strB.puzzle);
+
+            generatedBoards.emplace(i, strB);
+            i++;
+        }
+    }
+}
+
 void SudokuGenerator::printBoard(string& out)
 {
     out.clear();
@@ -317,4 +369,11 @@ void cell::reset()
 {
     row = -1;
     col = -1;
+}
+
+StrBoard::StrBoard(const int sz)
+{
+    int size = sz * sz;
+    solved.reserve(size);
+    puzzle.reserve(size);
 }
