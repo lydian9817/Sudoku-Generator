@@ -143,11 +143,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="write_util.cpp" />
     <ClCompile Include="SudokuSolver.cpp" />
     <ClCompile Include="sudoku.cpp" />
     <ClCompile Include="SudokuGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="json.hpp" />
+    <ClInclude Include="write_util.h" />
     <ClInclude Include="SudokuSolver.h" />
     <ClInclude Include="sudoku.h" />
   </ItemGroup>

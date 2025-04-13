@@ -396,3 +396,5 @@ FodyWeavers.xsd
 *.app
 
 output/
+
+generated_boards/
