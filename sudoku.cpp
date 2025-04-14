@@ -1,4 +1,5 @@
 #include <thread>
+#include "SudokuSolver.h"
 #include "sudoku.h"
 
 using namespace std;
@@ -340,8 +341,10 @@ void SudokuGenerator::generateBoards()
             StrBoard strB(size);
 
             boardToString(strB.solved);
-            deleteCellsToSolveBoard();
+            //deleteCellsToSolveBoard();
             boardToString(strB.puzzle);
+
+            SudokuSolver solver(board, size, boxSz, boxSz);
 
             generatedBoards.emplace(i, strB);
             i++;

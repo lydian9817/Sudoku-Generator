@@ -46,8 +46,8 @@ int main()
 	*/
 
 	generateEasyBoards();
-	generateNormalBoards();
-	generateHardBoards();
+	//generateNormalBoards();
+	//generateHardBoards();
 
 	cout << "Tableros generados" << endl;
 
@@ -57,7 +57,7 @@ int main()
 void generateEasyBoards()
 {
 	string fileName = "easy_boards.json";
-	SudokuGenerator generator(BoardSz::NINE, Difficulty::EASY, 15);
+	SudokuGenerator generator(BoardSz::FOUR, Difficulty::EASY, 1);
 	unordered_map<int, StrBoard>* bs = generator.getBoards();
 	writeToFile(bs, fileName);
 }
